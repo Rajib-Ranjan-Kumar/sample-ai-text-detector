@@ -21,7 +21,7 @@ st.set_page_config(
 # Text Preprocessing
 # --------------------------------------------------
 
-def preprocess_text(text):
+def preprocess_text1(text):
 
     # Handle missing values
     if pd.isna(text):
@@ -88,7 +88,27 @@ def load_model():
 
 tokenizer, model, device = load_model()
 
+import re
+import pandas as pd
 
+def preprocess_text(text):
+
+    # Handle missing values
+    if pd.isna(text):
+        return ""
+
+    text = str(text)
+
+    # Convert to lowercase
+    text = text.lower()
+
+    # Keep only alphabets, numbers, and spaces
+    text = re.sub(r'[^a-z0-9\s]', ' ', text)
+
+    # Remove extra spaces
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    return text
 # --------------------------------------------------
 # Prediction Function
 # --------------------------------------------------
@@ -96,7 +116,8 @@ tokenizer, model, device = load_model()
 def predict_text(text):
 
     # Preprocess input text
-    text = preprocess_text(text)
+    text = preprocess_text1(text)
+    text=preprocess_text(text)
 
     # Tokenization
     inputs = tokenizer(
