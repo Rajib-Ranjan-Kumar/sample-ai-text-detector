@@ -1,4 +1,6 @@
 
+import re
+import pandas as pd
 import streamlit as st
 import torch
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -13,6 +15,43 @@ st.set_page_config(
     page_icon="🤖",
     layout="centered"
 )
+
+
+# --------------------------------------------------
+# Text Preprocessing
+# --------------------------------------------------
+
+def preprocess_text(text):
+
+    # Handle missing values
+    if pd.isna(text):
+        return ""
+
+    text = str(text)
+
+    # 1. Convert to lowercase
+    text = text.lower()
+
+    # 2. Remove URLs
+    text = re.sub(r'https?://\S+|www\.\S+', ' ', text)
+
+    # 3. Remove HTML tags
+    text = re.sub(r'<.*?>', ' ', text)
+
+    # 4. Remove escaped characters
+    text = text.replace("\\'", "'")
+    text = text.replace('\\"', '"')
+
+    # 5. Remove punctuation
+    text = re.sub(r'[^a-z0-9\s]', ' ', text)
+
+    # 6. Remove numbers
+    text = re.sub(r'\d+', ' ', text)
+
+    # 7. Remove extra whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    return text
 
 
 # --------------------------------------------------
@@ -56,23 +95,30 @@ tokenizer, model, device = load_model()
 
 def predict_text(text):
 
+    # Preprocess input text
+    text = preprocess_text(text)
+
+    # Tokenization
     inputs = tokenizer(
-        str(text),
+        text,
         return_tensors="pt",
         truncation=True,
         max_length=512,
         return_token_type_ids=False
     )
 
+    # Move tensors to device
     inputs = {
         key: value.to(device)
         for key, value in inputs.items()
     }
 
+    # Model prediction
     with torch.no_grad():
 
         outputs = model(**inputs)
 
+    # Convert logits to probabilities
     probabilities = torch.softmax(
         outputs.logits,
         dim=-1
@@ -111,6 +157,10 @@ text = st.text_area(
     placeholder="Write or paste your text here..."
 )
 
+
+# --------------------------------------------------
+# Detect Button
+# --------------------------------------------------
 
 if st.button("🔍 Detect", use_container_width=True):
 
