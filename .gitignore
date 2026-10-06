@@ -1,0 +1,5 @@
+distilbert_ai_detector_final/
+__pycache__/
+*.pyc
+.venv/
+.env
