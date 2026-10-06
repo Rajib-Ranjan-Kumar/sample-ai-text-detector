@@ -137,14 +137,14 @@ if st.button("🔍 Detect", use_container_width=True):
 
             st.metric(
                 "AI Probability",
-                f"{result['ai_probability'] * 100:.2f}%"
+                f"{result['ai_probability'] * 100:.5f}%"
             )
 
         with col2:
 
             st.metric(
                 "Human Probability",
-                f"{result['human_probability'] * 100:.2f}%"
+                f"{result['human_probability'] * 100:.5f}%"
             )
 
         st.progress(
